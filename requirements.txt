@@ -10,3 +10,4 @@ openpyxl
 joblib
 scikit-learn
 imbalanced-learn
+xgboost
