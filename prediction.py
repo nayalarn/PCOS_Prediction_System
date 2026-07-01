@@ -10,14 +10,15 @@ from database import c, conn
 
 # LOAD MODEL
 @st.cache_resource
-def load_model():
+def load_resources():
     model = joblib.load("model_pcos_final.pkl")
     imputer = joblib.load("imputer.pkl")
     scaler = joblib.load("scaler.pkl")
     model_info = joblib.load("model_pcos_info.pkl")
     return model, imputer, scaler, model_info
 
-model, imputer, scaler, model_info = load_model()
+# MEMANGGIL VARIABEL
+model, imputer, scaler, model_info = load_resources()
 final_features = model_info['features']
 final_threshold = model_info['threshold']
 
@@ -141,14 +142,13 @@ def prediction_page():
         required_features = model_info["features"]
         input_data = input_data[required_features]
 
+        # PROSES MANUAL
         X_imp = imputer.transform(input_data)
         X_scaled = scaler.transform(X_imp)
         probability = model.predict_proba(X_scaled)[0][1]
 
     except Exception as e:
-        st.error(
-            f"Terjadi ketidakcocokan data input dengan model.\n\nError: {e}"
-        )
+        st.error(f"Terjadi kesalahan prediksi: {e}")
         probability = 0.0
 
     threshold = model_info["threshold"]
