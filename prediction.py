@@ -16,6 +16,8 @@ def load_model():
     return pipeline, model_info
 
 pipeline, model_info = load_model()
+final_features = model_info['features']
+final_threshold = model_info['threshold']
 
 
 # HITUNG RISIKO
