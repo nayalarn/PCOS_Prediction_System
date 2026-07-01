@@ -11,11 +11,13 @@ from database import c, conn
 # LOAD MODEL
 @st.cache_resource
 def load_model():
-    pipeline = joblib.load("model_pcos_final.pkl")
+    model = joblib.load("model_pcos_final.pkl")
+    imputer = joblib.load("imputer.pkl")
+    scaler = joblib.load("scaler.pkl")
     model_info = joblib.load("model_pcos_info.pkl")
-    return pipeline, model_info
+    return model, imputer, scaler, model_info
 
-pipeline, model_info = load_model()
+model, imputer, scaler, model_info = load_model()
 final_features = model_info['features']
 final_threshold = model_info['threshold']
 
