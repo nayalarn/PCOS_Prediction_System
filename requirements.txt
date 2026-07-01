@@ -8,6 +8,6 @@ streamlit-option-menu
 pandas
 openpyxl
 joblib
-scikit-learn
+scikit-learn==1.8.0
 imbalanced-learn
 xgboost
