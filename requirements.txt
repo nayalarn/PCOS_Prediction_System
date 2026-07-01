@@ -1,9 +1,9 @@
-scikit-learn==1.5.2
-imbalanced-learn==0.12.3
+streamlit
+streamlit-option-menu
 pandas
 openpyxl
 joblib
 xgboost
-streamlit
-streamlit-option-menu
+scikit-learn
+imbalanced-learn
 requests
