@@ -139,10 +139,11 @@ def prediction_page():
     # SCALING & PREDIKSI
     try:
         required_features = model_info["features"]
-
         input_data = input_data[required_features]
 
-        probability = pipeline.predict_proba(input_data)[0][1]
+        X_imp = imputer.transform(input_data)
+        X_scaled = scaler.transform(X_imp)
+        probability = model.predict_proba(X_scaled)[0][1]
 
     except Exception as e:
         st.error(
