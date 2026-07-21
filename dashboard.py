@@ -186,7 +186,7 @@ def dashboard_page():
 
     # STATUS UTAMA
     st.markdown("## Status Utama")
-    c1, c2, c3, c4, = st.columns(5)
+    c1, c2, c3, c4, = st.columns(4)
     with c1: st.metric("BMI", f"{bmi:.2f}" if bmi else "-")
     with c2: st.metric("Kategori BMI", kategori_bmi)
     with c3:
