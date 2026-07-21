@@ -12,7 +12,7 @@ def on_table_change():
     if not edited_rows and not deleted_rows:
         return
         
-    # Buat DataFrame pencocokan dari data riwayat saat ini sebelum diubah
+    # Buat DataFrame pencocokan dari data riwayat saat ini sebelum diubah (tanpa di-reverse)
     df_hist = pd.DataFrame(st.session_state.history)
     
     # Penghapusan Baris
@@ -62,7 +62,7 @@ def on_table_change():
                 ))
         conn.commit()
 
-    # Muat Ulang Data Baru dari Database agar Sinkron setelah Edit/Hapus
+    # 3. Muat Ulang Data Baru dari Database agar Sinkron
     c.execute(
         "SELECT id, tanggal, waktu, aktivitas, item, jumlah, mood, kalori, gula, air_minum, durasi_tidur, jam_tidur, haid FROM activity_history WHERE user_id = ?",
         (st.session_state.user_id,)
@@ -97,57 +97,20 @@ def on_table_change():
             "Haid": row[12]
         })
 
-    # Hapus state editor agar memaksa Streamlit merender ulang tabel menggunakan data baru
+    # Hapus state editor agar memaksa Streamlit merender ulang tabel dari nol menggunakan data baru
     if "history_editor" in st.session_state:
         del st.session_state.history_editor
-
 
 def history_page():
 
     st.title("Catatan Aktivitas")
     st.write("---")
 
-    # ==================== FORCE LOAD DARI DB BILA MEMORI RIWAYAT KOSONG ====================
-    if not st.session_state.history:
-        c.execute(
-            "SELECT id, tanggal, waktu, aktivitas, item, jumlah, mood, kalori, gula, air_minum, durasi_tidur, jam_tidur, haid FROM activity_history WHERE user_id = ?",
-            (st.session_state.user_id,)
-        )
-        rows = c.fetchall()
-        for row in rows:
-            try:
-                durasi_tidur_val = float(row[10]) if row[10] not in (None, "-", "None") else 0.0
-            except ValueError:
-                durasi_tidur_val = 0.0
-
-            db_date = row[1]
-            try:
-                formatted_date = datetime.datetime.strptime(db_date, "%Y-%m-%d").strftime("%d-%m-%Y")
-            except:
-                formatted_date = db_date
-
-            st.session_state.history.append({
-                "id": row[0],
-                "tanggal": formatted_date,
-                "Waktu": row[2],
-                "Aktivitas": row[3],
-                "Item": row[4],
-                "Jumlah": row[5],
-                "Mood": row[6],
-                "Est. Kalori (Kal)": row[7],
-                "Est. Gula (g)": row[8],
-                "Air Minum (L)": row[9],
-                "Durasi Tidur": durasi_tidur_val,
-                "Jam Tidur": row[11],
-                "Haid": row[12]
-            })
-
-    # Jika setelah dicek ke database pun memang belum pernah menginput data sama sekali
     if not st.session_state.history:
         st.info("Belum ada riwayat")
         return
 
-    # Membuat DataFrame dari data riwayat
+    # Membuat DataFrame dari data riwayat sesuai urutan inputan (tanpa di-reverse)
     df_hist = pd.DataFrame(st.session_state.history)
 
     st.info("Klik dua kali pada kotak tabel untuk mengubah isi. Untuk menghapus baris, klik/centang bagian kiri baris lalu tekan **Delete** pada keyboard Anda atau klik **ikon tempat sampah** di kanan atas tabel.")
@@ -156,12 +119,12 @@ def history_page():
     st.data_editor(
         df_hist,
         use_container_width=True,
-        num_rows="dynamic",
+        num_rows="dynamic",  # Mengaktifkan penambahan/penghapusan baris
         column_config={
-            "id": None,  # Sembunyikan ID agar lebih rapi bagi user
+            "id": None,  # Sembunyikan kolom ID unik agar lebih rapi bagi user
             "tanggal": st.column_config.TextColumn("Tanggal", help="Format: DD-MM-YYYY"),
             "Waktu": st.column_config.TextColumn("Waktu"),
-            "Aktivitas": st.column_config.TextColumn("Aktivitas", disabled=True), 
+            "Aktivitas": st.column_config.TextColumn("Aktivitas", disabled=True), # Tipe aktivitas tidak boleh diubah
             "Item": st.column_config.TextColumn("Item / Kegiatan"),
             "Jumlah": st.column_config.NumberColumn("Jumlah", min_value=0.0, step=0.1),
             "Mood": st.column_config.SelectboxColumn("Mood", options=["🤩 Bahagia", "😐 Standar", "🥲 Sedih", "😡 Stress"]),

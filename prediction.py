@@ -11,14 +11,12 @@ from database import c, conn
 # LOAD MODEL
 @st.cache_resource
 def load_resources():
-    model = joblib.load("model_pcos_final.pkl")
-    imputer = joblib.load("imputer.pkl")
-    scaler = joblib.load("scaler.pkl")
+    # Cukup load file pipeline utama, karena di dalamnya SUDAH ADA imputer & scaler bawaan Colab
+    pipeline_final = joblib.load("model_pcos_final.pkl")
     model_info = joblib.load("model_pcos_info.pkl")
-    return model, imputer, scaler, model_info
+    return pipeline_final, model_info
 
-# MEMANGGIL VARIABEL
-model, imputer, scaler, model_info = load_resources()
+pipeline_final, model_info = load_resources()
 final_features = model_info['features']
 final_threshold = model_info['threshold']
 
@@ -142,10 +140,8 @@ def prediction_page():
         required_features = model_info["features"]
         input_data = input_data[required_features]
 
-        # PROSES MANUAL
-        X_imp = imputer.transform(input_data)
-        X_scaled = scaler.transform(X_imp)
-        probability = model.predict_proba(X_scaled)[0][1]
+        # JAUH LEBIH SIMPEL: Langsung panggil pipeline_final tanpa perlu transform manual satu-satu
+        probability = pipeline_final.predict_proba(input_data)[0][1]
 
     except Exception as e:
         st.error(f"Terjadi kesalahan prediksi: {e}")
