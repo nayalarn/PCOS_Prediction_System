@@ -155,21 +155,6 @@ def dashboard_page():
                 except:
                     pass
 
-    # AI PREDICTION
-    probability = 0
-    risiko = "-"
-    if bmi and cycle_length and model_ai is not None:
-        input_data = pd.DataFrame([[berat, tinggi, bmi, cycle_length]], 
-                                  columns=["Weight (Kg)", "Height(Cm)", "BMI", "Cycle length(days)"])
-        try:
-            scaled_data = scaler.transform(input_data) if scaler else input_data
-            probability = model_ai.predict_proba(scaled_data)[0][1]
-            if probability < 0.15: risiko = "Rendah"
-            elif probability < 0.35: risiko = "Sedang"
-            else: risiko = "Tinggi"
-        except:
-            pass
-
     # REKOMENDASI
     st.markdown("## Rekomendasi Harian")
     if total_air < 8:
@@ -201,14 +186,13 @@ def dashboard_page():
 
     # STATUS UTAMA
     st.markdown("## Status Utama")
-    c1, c2, c3, c4, c5 = st.columns(5)
+    c1, c2, c3, c4, = st.columns(5)
     with c1: st.metric("BMI", f"{bmi:.2f}" if bmi else "-")
     with c2: st.metric("Kategori BMI", kategori_bmi)
-    with c3: st.metric("Risiko PCOS", risiko)
-    with c4:
+    with c3:
         score = max(0, 100 - (total_kalori / 30)) if total_kalori > 0 else 100
         st.metric("Skor Gaya Hidup", f"{score:.0f}")
-    with c5: st.metric("Menstruasi Selanjutnya", next_period)
+    with c4: st.metric("Menstruasi Selanjutnya", next_period)
 
     st.divider()
 
